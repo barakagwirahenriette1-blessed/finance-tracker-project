@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard - Finance Tracker</title>
+<link rel="stylesheet" href="dashboard.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<!-- Topbar -->
+<header class="topbar">
+  <h1>Finance Tracker</h1>
+  <div class="user-area">
+   
+ 
+
+<!-- Menu -->
+<nav class="top-menu">
+  <ul class="menu-list">
+    <li><a href="#dashboard" class="active">Dashboard</a></li>
+    <li><a href="#categories">Categories</a></li>
+    <li><a href="#analytics">Analytics</a></li>
+    <li><a href="#expenses">Expenses</a></li>
+    <li><a href="#income">Income</a></li>
+    <li><a href="#settings">Settings</a></li>
+  </ul>
+</nav>
+ <span id="greeting">Hi, User</span>
+    <button id="darkModeToggle" class="btn small">🌙</button>
+    <button id="signout" class="btn small">Sign out</button>
+ </div>
+</header>
+<main class="container">
+  <!-- Dashboard -->
+  <section id="dashboard" class="page-section">
+    <h2>Dashboard</h2>
+    <div class="summary-cards">
+      <div class="card summary"><h3>Total Balance</h3><p id="totalBalance">RWF 0</p></div>
+      <div class="card summary"><h3>This Month Income</h3><p id="monthIncome">RWF 0</p></div>
+      <div class="card summary"><h3>This Month Expense</h3><p id="monthExpense">RWF 0</p></div>
+    </div>
+  </section>
+
+  <!-- Categories -->
+  <section id="categories" class="page-section">
+    <h2>Categories</h2>
+    <ul id="categoryList"></ul>
+  </section>
+
+  <!-- Analytics -->
+  <section id="analytics" class="page-section">
+    <h2>Analytics</h2>
+    <p>Visualize your spending patterns and income vs expense trends.</p>
+    
+    <canvas id="analyticsPieChart" height="100"></canvas>
+    <canvas id="analyticsLineChart" height="100"></canvas>
+  </section>
+
+  <!-- Expenses -->
+  <section id="expenses" class="page-section">
+    <h2>Expenses</h2>
+    <button id="addExpenseBtn" class="btn small">Add Expense</button>
+    <div id="expenseFormContainer" style="display:none; margin-top:1rem;">
+      <form id="expenseForm">
+        <label>Date: <input type="date" id="expenseDate" required></label>
+        <label>Category: <input type="text" id="expenseCategory" required></label>
+        <label>Description: <input type="text" id="expenseDesc" required></label>
+        <label>Amount: <input type="number" id="expenseAmount" required></label>
+        <button type="submit" class="btn small">Add Expense</button>
+      </form>
+    </div>
+    <table id="expensesTable">
+      <thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Amount</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <!-- Income -->
+  <section id="income" class="page-section">
+    <h2>Income</h2>
+    <button id="addIncomeBtn" class="btn small">Add Income</button>
+    <div id="incomeFormContainer" style="display:none; margin-top:1rem;">
+      <form id="incomeForm">
+        <label>Date: <input type="date" id="incomeDate" required></label>
+        <label>Category: <input type="text" id="incomeCategory" required></label>
+        <label>Description: <input type="text" id="incomeDesc" required></label>
+        <label>Amount: <input type="number" id="incomeAmount" required></label>
+        <button type="submit" class="btn small">Add Income</button>
+      </form>
+    </div>
+    <table id="incomeTable">
+      <thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Amount</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <!-- Settings -->
+  <section id="settings" class="page-section">
+    <h2>Settings</h2>
+    <form id="settingsForm">
+      <label>Full Name: <input type="text" id="setName"></label>
+      <label>Email: <input type="email" id="setEmail" disabled></label>
+      <label>Password: <input type="password" id="setPassword"></label>
+      <button class="btn">Update Profile</button>
+    </form>
+  </section>
+</main>
+
+<footer class="footer">
+  <p>Finance Tracker  Copyright &copy; 2025  ,All Rights Reserved</p>
+</footer>
+
+<script>
+  // ---------------- AUTH ----------------
+  const currentUserEmail = localStorage.getItem('ft_currentUser');
+  if(!currentUserEmail) window.location.href='index.html';
+  const users = JSON.parse(localStorage.getItem('ft_users')||'{}');
+  const currentUser = users[currentUserEmail];
+  document.getElementById('greeting').textContent = `Hi, ${currentUser.name}`;
+
+  // --------------- LOGOUT ----------------
+  document.getElementById('signout').addEventListener('click', ()=>{
+    localStorage.removeItem('ft_currentUser');
+    window.location.href='index.html';
+  });
+
+  // --------------- DARK MODE -------------
+  const toggle = document.getElementById('darkModeToggle');
+  toggle.addEventListener('click', ()=>{
+    document.body.classList.toggle('dark-mode');
+  });
+
+  // --------------- MENU ACTIVE -----------
+  const menuLinks = document.querySelectorAll('.menu-list li a');
+  menuLinks.forEach(link=>{
+    link.addEventListener('click', function(){
+      menuLinks.forEach(l=>l.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+
+  // --------------- TRANSACTIONS ----------
+  const expensesTableBody = document.querySelector('#expensesTable tbody');
+  const incomeTableBody = document.querySelector('#incomeTable tbody');
+  const categoryList = document.getElementById('categoryList');
+
+  let transactions = currentUser.transactions || [];
+
+  function renderTransactions(){
+    expensesTableBody.innerHTML='';
+    incomeTableBody.innerHTML='';
+    const categoriesSet = new Set();
+    let totalIncome=0,totalExpense=0;
+    transactions.forEach(tx=>{
+      categoriesSet.add(tx.category);
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${tx.date}</td><td>${tx.category}</td><td>${tx.desc}</td><td>${tx.amount}</td>`;
+      if(tx.type==='income'){ incomeTableBody.appendChild(tr); totalIncome+=Number(tx.amount);}
+      else{ expensesTableBody.appendChild(tr); totalExpense+=Number(tx.amount);}
+    });
+
+    // Update categories
+    categoryList.innerHTML='';
+    categoriesSet.forEach(cat=>{
+      const li = document.createElement('li');
+      li.textContent = cat;
+      categoryList.appendChild(li);
+    });
+
+    // Update summary
+    document.getElementById('totalBalance').textContent = `RWF ${totalIncome - totalExpense}`;
+    document.getElementById('monthIncome').textContent = `RWF ${totalIncome}`;
+    document.getElementById('monthExpense').textContent = `RWF ${totalExpense}`;
+
+    // Update charts
+    updateCharts();
+  }
+
+  // Add Transaction Forms
+  document.getElementById('addExpenseBtn').addEventListener('click',()=>{document.getElementById('expenseFormContainer').style.display='block';});
+  document.getElementById('expenseForm').addEventListener('submit',e=>{
+    e.preventDefault();
+    const tx = { type:'expense', date:document.getElementById('expenseDate').value, category:document.getElementById('expenseCategory').value, desc:document.getElementById('expenseDesc').value, amount:Number(document.getElementById('expenseAmount').value)};
+    transactions.push(tx);
+    currentUser.transactions = transactions;
+    users[currentUser.email] = currentUser;
+    localStorage.setItem('ft_users', JSON.stringify(users));
+    renderTransactions();
+    document.getElementById('expenseFormContainer').style.display='none';
+    e.target.reset();
+  });
+
+  document.getElementById('addIncomeBtn').addEventListener('click',()=>{document.getElementById('incomeFormContainer').style.display='block';});
+  document.getElementById('incomeForm').addEventListener('submit',e=>{
+    e.preventDefault();
+    const tx = { type:'income', date:document.getElementById('incomeDate').value, category:document.getElementById('incomeCategory').value, desc:document.getElementById('incomeDesc').value, amount:Number(document.getElementById('incomeAmount').value)};
+    transactions.push(tx);
+    currentUser.transactions = transactions;
+    users[currentUser.email] = currentUser;
+    localStorage.setItem('ft_users', JSON.stringify(users));
+    renderTransactions();
+    document.getElementById('incomeFormContainer').style.display='none';
+    e.target.reset();
+  });
+
+  // --------------- SETTINGS ----------------
+  const settingsForm = document.getElementById('settingsForm');
+  document.getElementById('setName').value = currentUser.name;
+  document.getElementById('setEmail').value = currentUser.email;
+  document.getElementById('setPassword').value = currentUser.password;
+
+  settingsForm.addEventListener('submit', e=>{
+    e.preventDefault();
+    currentUser.name = document.getElementById('setName').value.trim();
+    currentUser.password = document.getElementById('setPassword').value;
+    users[currentUser.email] = currentUser;
+    localStorage.setItem('ft_users', JSON.stringify(users));
+    document.getElementById('greeting').textContent = `Hi, ${currentUser.name}`;
+    alert('Profile updated!');
+  });
+
+    const pieCtx = document.getElementById('analyticsPieChart').getContext('2d');
+    new Chart(pieCtx, {
+      type:'pie',
+      data:{
+        labels:['Groceries','Coffee','Entertainment'],
+        datasets:[{data:[12000,3000,5000], backgroundColor:['#3b82f6','#10b981','#f59e0b'] }]
+      }
+    });
+
+    const lineCtx = document.getElementById('analyticsLineChart').getContext('2d');
+    new Chart(lineCtx,{
+      type:'line',
+      data:{
+        labels:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+        datasets:[{label:'Balance', data:[10000,20000,15000,25000,30000,35000,40000,45000,50000,60000,70000,80000], borderColor:'#3b82f6', tension:0.3}]
+      }
+    });
+
+  function updateCharts(){
+    // Pie chart for expenses by category
+    const expenseCategories = {};
+    transactions.filter(tx=>tx.type==='expense').forEach(tx=>{
+      if(expenseCategories[tx.category]) expenseCategories[tx.category]+=tx.amount;
+      else expenseCategories[tx.category]=tx.amount;
+    });
+    pieData.labels = Object.keys(expenseCategories);
+    pieData.datasets[0].data = Object.values(expenseCategories);
+    pieData.datasets[0].backgroundColor = pieData.labels.map(()=>'#'+Math.floor(Math.random()*16777215).toString(16));
+    pieChart.update();
+
+    // Line chart for balance
+    let monthlyBalance = Array(12).fill(0);
+    transactions.forEach(tx=>{
+      const month = new Date(tx.date).getMonth();
+      if(tx.type==='income') monthlyBalance[month]+=tx.amount;
+      else monthlyBalance[month]-=tx.amount;
+    });
+    lineData.datasets[0].data = monthlyBalance;
+    lineChart.update();
+  }
+
+  renderTransactions();
+  
+</script>
+
+
+</body>
+</html>
+

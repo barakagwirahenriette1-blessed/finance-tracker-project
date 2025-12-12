@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up - Finance Tracker</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="login-container">
+    <h2>Create Account</h2>
+    <form id="signupForm">
+      <label>Full Name:</label>
+      <input type="text" id="name" required>
+      <label>Email:</label>
+      <input type="email" id="email" required>
+      <label>Password:</label>
+      <input type="password" id="password" required>
+      <button type="submit" class="btn">Sign Up</button>
+    </form>
+    <p>Already have an account? <a href="index.html">Login here</a></p>
+  </div>
+
+  <script>
+    const signupForm = document.getElementById('signupForm');
+    signupForm.addEventListener('submit', e => {
+      e.preventDefault();
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+
+      let users = JSON.parse(localStorage.getItem('ft_users') || '{}');
+      if(users[email]){
+        alert('User already exists. Please login.');
+        return;
+      }
+
+      users[email] = { name, email, password, transactions: [] };
+      localStorage.setItem('ft_users', JSON.stringify(users));
+      alert('Account created successfully!');
+      window.location.href = 'index.html';
+    });
+  </script>
+</body>
+</html>

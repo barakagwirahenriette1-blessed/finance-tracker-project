@@ -1,0 +1,187 @@
+/* ================================
+   ROOT VARIABLES
+================================= */
+:root {
+  --bg: #f4f6fb;
+  --card: #ffffff;
+  --accent: #3b82f6;
+  --light: #e6e9ef;
+  --text: #0f172a;
+  --muted: #6b7280;
+  --success: #10b981;
+  --danger: #ef4444;
+  --shadow: 0 6px 16px rgba(0,0,0,0.08);
+  font-family: 'Inter', Arial, sans-serif;
+}
+
+/* ================================
+   GLOBAL STYLES
+================================= */
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); line-height: 1.5; }
+h1,h2,h3 { margin: 0 0 0.5rem; }
+html { scroll-behavior: smooth; }
+
+/* ================================
+   TOPBAR
+================================= */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  background: #fff;
+  border-bottom: 1px solid var(--light);
+  box-shadow: var(--shadow);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.user-area {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.btn {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.45rem 0.9rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn.small { padding: 0.3rem 0.6rem; font-size: 0.85rem; }
+.btn.alt { background:#fff; color:var(--muted); border:1px solid var(--light); }
+.btn:hover { opacity: 0.9; }
+
+/* ================================
+   TOP MENU
+================================= */
+.top-menu {
+  background: #fff;
+  border-bottom: 1px solid var(--light);
+  box-shadow: var(--shadow);
+  position: sticky;
+  top: 62px; /* height of topbar */
+  z-index: 99;
+}
+
+.top-menu .menu-list {
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin: 0;
+  padding: 0.5rem 0;
+}
+
+.top-menu .menu-list li a {
+  text-decoration: none;
+  color: var(--text);
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.top-menu .menu-list li a:hover,
+.top-menu .menu-list li a.active {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* ================================
+   MAIN CONTAINER
+================================= */
+.container {
+  max-width: 1200px;
+  margin: 2rem auto 0 auto;
+  padding: 0 1rem;
+}
+
+/* ================================
+   PAGE SECTIONS
+================================= */
+.page-section { padding: 2rem 0; border-bottom: 1px solid var(--light); }
+.page-section h2 { margin-bottom: 1rem; font-size: 1.5rem; }
+
+/* ================================
+   SUMMARY CARDS
+================================= */
+.summary-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.summary {
+  flex: 1;
+  min-width: 200px;
+  background: var(--card);
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: var(--shadow);
+}
+
+.summary h3 { font-size: 1rem; color: var(--muted); }
+.summary p { margin-top: 0.5rem; font-size: 1.6rem; font-weight: 700; }
+
+/* ================================
+   TABLE STYLES
+================================= */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  background: var(--card);
+  box-shadow: var(--shadow);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+table th, table td {
+  padding: 0.6rem 0.8rem;
+  text-align: left;
+  font-size: 0.95rem;
+}
+
+table th { background: var(--light); font-weight: 600; }
+table td.amount { font-weight: 700; }
+
+/* ================================
+   FORM STYLES
+================================= */
+form label { display: block; font-size: 0.95rem; margin: 0.5rem 0 0.25rem; }
+form input, form select { width: 100%; padding: 0.55rem; border: 1px solid var(--light); border-radius: 6px; margin-bottom: 0.6rem; }
+
+/* ================================
+   FOOTER
+================================= */
+.footer { text-align: center; padding: 1.5rem 0; margin-top: 2rem; background:#fff; border-top:1px solid var(--light); color: var(--muted); font-size:0.95rem; }
+
+/* ================================
+   DARK MODE
+================================= */
+body.dark-mode { background:#121212; color:#e5e5e5; }
+body.dark-mode .card, body.dark-mode table { background:#1f1f1f; color:#e5e5e5; border-color:#333; }
+body.dark-mode .topbar, body.dark-mode .top-menu, body.dark-mode .footer { background:#1a1a1a; color:#e5e5e5; border-color:#333; }
+body.dark-mode .menu-list li a.active, body.dark-mode .menu-list li a:hover { background:#3b82f6; color:#fff; }
+
+/* ================================
+   RESPONSIVE
+================================= */
+@media (max-width: 900px) {
+  .summary-cards { flex-direction: column; }
+  .container { margin: 1rem; }
+  .top-menu .menu-list { flex-wrap: wrap; justify-content: center; }
+}
+
+@media (max-width: 500px) {
+  .top-menu .menu-list li a { padding: 0.4rem 0.7rem; font-size: 0.85rem; }
+  .summary p { font-size: 1.4rem; }
+}
